@@ -1,5 +1,7 @@
 package com.example.pizzaoven.ui.screens
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.content.contentReceiver
@@ -20,23 +22,36 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonElevation
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.ImageShader
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.ShaderBrush
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pizzaoven.R
+import com.example.pizzaoven.ui.composables.IngredientLayer
 
 val additiveList = listOf<String>()
 val breadsTypesList = listOf(
@@ -46,6 +61,33 @@ val breadsTypesList = listOf(
     R.drawable.bread_4,
     R.drawable.bread_5,
 )
+val basilList = listOf(
+    R.drawable.basil_1,
+    R.drawable.basil_2,
+    R.drawable.basil_3,
+    R.drawable.basil_4,
+    R.drawable.basil_5,
+    R.drawable.basil_6,
+    R.drawable.basil_7,
+    R.drawable.basil_8,
+    R.drawable.basil_1,
+    R.drawable.basil_2,
+    R.drawable.basil_3,
+    R.drawable.basil_4,
+    R.drawable.basil_5,
+    R.drawable.basil_6,
+    R.drawable.basil_7,
+    R.drawable.basil_8,
+    R.drawable.basil_1,
+    R.drawable.basil_2,
+    R.drawable.basil_3,
+    R.drawable.basil_4,
+    R.drawable.basil_5,
+    R.drawable.basil_6,
+    R.drawable.basil_7,
+    R.drawable.basil_8,
+
+    )
 
 @Composable
 fun MainPizzaScreen(modifier: Modifier = Modifier) {
@@ -87,6 +129,11 @@ fun MainPizzaScreen(modifier: Modifier = Modifier) {
                             .fillMaxWidth(0.65f)
                     )
                 }
+            }
+
+            Box(modifier = Modifier.fillMaxWidth(0.75f), contentAlignment = Alignment.Center) {
+                IngredientLayer(basilList, modifier = Modifier)
+
             }
         }
 
@@ -154,7 +201,7 @@ fun MainPizzaScreen(modifier: Modifier = Modifier) {
         Spacer(Modifier.height(30.dp))
 
         LazyRow(
-            modifier= Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -191,7 +238,7 @@ fun MainPizzaScreen(modifier: Modifier = Modifier) {
             item {
                 Box(
                     modifier = Modifier
-                        .background(color =Color.White, shape = CircleShape)
+                        .background(color = Color.White, shape = CircleShape)
                         .size(70.dp)
                 ) {
                     Image(
@@ -241,6 +288,8 @@ fun MainPizzaScreen(modifier: Modifier = Modifier) {
             contentPadding = PaddingValues(10.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
+            Icon(Icons.Default.ShoppingCart, contentDescription = null)
+            Spacer(Modifier.width(7.dp))
             Text("Add To Cart", color = Color.LightGray, fontSize = 20.sp)
         }
     }
