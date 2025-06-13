@@ -16,6 +16,7 @@ class MainPizzaScreenViewModel: ViewModel(){
         _pizzaScreenState.value = PizzaScreenUiState(
             pizzasUiState = initialPizzas
         )
+        println("pizza screen state: ${_pizzaScreenState.value}")
     }
 
     fun changeSize( newSize: PizzaSize){
@@ -43,6 +44,9 @@ class MainPizzaScreenViewModel: ViewModel(){
             pizzasUiState = availablePizzas
         )
 
+    }
+    fun updateSelectedPizzaIndex(newIndex:Int){
+        _pizzaScreenState.value = _pizzaScreenState.value.copy(selectedPizzaIndex = newIndex)
     }
 
 }

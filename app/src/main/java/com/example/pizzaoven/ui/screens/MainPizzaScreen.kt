@@ -1,10 +1,6 @@
 package com.example.pizzaoven.ui.screens
-
-import android.graphics.Bitmap
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.content.contentReceiver
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,32 +22,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.ImageShader
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.ShaderBrush
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pizzaoven.R
 import com.example.pizzaoven.ui.composables.IngredientLayer
+import com.example.pizzaoven.ui.viewmodel.MainPizzaScreenViewModel
+import com.example.pizzaoven.ui.viewmodel.getBreadResource
+import com.example.pizzaoven.ui.viewmodel.getPizzaSizeInDp
 
 val additiveList = listOf<String>()
 val breadsTypesList = listOf(
@@ -61,37 +50,19 @@ val breadsTypesList = listOf(
     R.drawable.bread_4,
     R.drawable.bread_5,
 )
-val basilList = listOf(
-    R.drawable.basil_1,
-    R.drawable.basil_2,
-    R.drawable.basil_3,
-    R.drawable.basil_4,
-    R.drawable.basil_5,
-    R.drawable.basil_6,
-    R.drawable.basil_7,
-    R.drawable.basil_8,
-    R.drawable.basil_1,
-    R.drawable.basil_2,
-    R.drawable.basil_3,
-    R.drawable.basil_4,
-    R.drawable.basil_5,
-    R.drawable.basil_6,
-    R.drawable.basil_7,
-    R.drawable.basil_8,
-    R.drawable.basil_1,
-    R.drawable.basil_2,
-    R.drawable.basil_3,
-    R.drawable.basil_4,
-    R.drawable.basil_5,
-    R.drawable.basil_6,
-    R.drawable.basil_7,
-    R.drawable.basil_8,
-
-    )
 
 @Composable
-fun MainPizzaScreen(modifier: Modifier = Modifier) {
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { breadsTypesList.size })
+fun MainPizzaScreen(
+    modifier: Modifier = Modifier,
+
+) {
+    val pizzaScreenViewModel: MainPizzaScreenViewModel = viewModel()
+
+   val mainScreenState by pizzaScreenViewModel.state
+
+    val pagerState = rememberPagerState(
+        initialPage = mainScreenState.selectedPizzaIndex, pageCount = {mainScreenState.pizzasUiState.size }
+    )
     Column(
         modifier = modifier
             .padding(horizontal = 16.dp)
@@ -116,25 +87,31 @@ fun MainPizzaScreen(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .align(Alignment.Center),
                 state = pagerState,
-                key = { breadsTypesList[it] }) { index ->
+                key = {
+                    mainScreenState.pizzasUiState[it].index
+                }) { index ->
                 Box(
                     modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(breadsTypesList[index]),
+                        painter = painterResource(
+                            mainScreenState.pizzasUiState[index].getBreadResource()
+                        ),
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier
                             .align(Alignment.Center)
-                            .fillMaxWidth(0.65f)
+                            .width(getPizzaSizeInDp(mainScreenState.pizzasUiState[index].size))
                     )
+                    Box(modifier = Modifier.fillMaxWidth(0.75f), contentAlignment = Alignment.Center) {
+                        IngredientLayer(basilIngredientlList, modifier = Modifier)
+
+                    }
+
                 }
             }
 
-            Box(modifier = Modifier.fillMaxWidth(0.75f), contentAlignment = Alignment.Center) {
-                IngredientLayer(basilList, modifier = Modifier)
 
-            }
         }
 
         Spacer(Modifier.height(25.dp))
@@ -298,5 +275,5 @@ fun MainPizzaScreen(modifier: Modifier = Modifier) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun PreviewMainPizzaScreen() {
-    MainPizzaScreen()
+    //MainPizzaScreen(pizzaScreenViewModel = MainPizzaScreenViewModel())
 }
