@@ -1,6 +1,8 @@
 package com.example.pizzaoven.ui.screens
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +28,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,34 +42,33 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pizzaoven.R
 import com.example.pizzaoven.ui.composables.IngredientLayer
+import com.example.pizzaoven.ui.viewmodel.IngredientType
 import com.example.pizzaoven.ui.viewmodel.MainPizzaScreenViewModel
+import com.example.pizzaoven.ui.viewmodel.PizzaSize
 import com.example.pizzaoven.ui.viewmodel.getBreadResource
+import com.example.pizzaoven.ui.viewmodel.getImageResource
+import com.example.pizzaoven.ui.viewmodel.getIngredientLayerImageList
 import com.example.pizzaoven.ui.viewmodel.getPizzaSizeInDp
 
-val additiveList = listOf<String>()
-val breadsTypesList = listOf(
-    R.drawable.bread_1,
-    R.drawable.bread_2,
-    R.drawable.bread_3,
-    R.drawable.bread_4,
-    R.drawable.bread_5,
-)
 
 @Composable
 fun MainPizzaScreen(
     modifier: Modifier = Modifier,
 
-) {
+    ) {
     val pizzaScreenViewModel: MainPizzaScreenViewModel = viewModel()
 
-   val mainScreenState by pizzaScreenViewModel.state
+    val mainScreenState by pizzaScreenViewModel.state
 
     val pagerState = rememberPagerState(
-        initialPage = mainScreenState.selectedPizzaIndex, pageCount = {mainScreenState.pizzasUiState.size }
-    )
+        initialPage = mainScreenState.selectedPizzaIndex,
+        pageCount = { mainScreenState.pizzasUiState.size })
+
+    LaunchedEffect(pagerState.currentPage) {
+        pizzaScreenViewModel.updateSelectedPizzaIndex(pagerState.currentPage)
+    }
     Column(
         modifier = modifier
-            .padding(horizontal = 16.dp)
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -103,8 +106,12 @@ fun MainPizzaScreen(
                             .align(Alignment.Center)
                             .width(getPizzaSizeInDp(mainScreenState.pizzasUiState[index].size))
                     )
-                    Box(modifier = Modifier.fillMaxWidth(0.75f), contentAlignment = Alignment.Center) {
-                        IngredientLayer(basilIngredientlList, modifier = Modifier)
+                    Box(
+                        modifier = Modifier.fillMaxWidth(0.75f), contentAlignment = Alignment.Center
+                    ) {
+                        mainScreenState.pizzasUiState[index].ingredients.forEach {
+                            IngredientLayer(it.getIngredientLayerImageList())
+                        }
 
                     }
 
@@ -123,13 +130,18 @@ fun MainPizzaScreen(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Button(
-                onClick = {},
+                onClick = {
+                    pizzaScreenViewModel.changeSize(PizzaSize.S)
+
+                },
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White, contentColor = Color.Black
                 ),
                 modifier = Modifier.size(70.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
+                elevation = if (mainScreenState.pizzasUiState[mainScreenState.selectedPizzaIndex].size == PizzaSize.S) ButtonDefaults.buttonElevation(
+                    defaultElevation = 3.dp
+                ) else ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 // ==> this will change according to state
             ) {
                 Text("S", fontSize = 25.sp)
@@ -138,26 +150,35 @@ fun MainPizzaScreen(
             Spacer(Modifier.width(20.dp))
 
             Button(
-                onClick = {},
+                onClick = {
+                    pizzaScreenViewModel.changeSize(PizzaSize.M)
+
+                },
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White, contentColor = Color.Black
                 ),
                 modifier = Modifier.size(70.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
+                elevation = if (mainScreenState.pizzasUiState[mainScreenState.selectedPizzaIndex].size == PizzaSize.M) ButtonDefaults.buttonElevation(
+                    defaultElevation = 3.dp
+                ) else ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 // ==> this will change according to state
             ) {
                 Text("M", fontSize = 25.sp)
             }
             Spacer(Modifier.width(20.dp))
             Button(
-                onClick = {},
+                onClick = {
+                    pizzaScreenViewModel.changeSize(PizzaSize.L)
+                },
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White, contentColor = Color.Black
                 ),
                 modifier = Modifier.size(70.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
+                elevation = if (mainScreenState.pizzasUiState[mainScreenState.selectedPizzaIndex].size == PizzaSize.L) ButtonDefaults.buttonElevation(
+                    defaultElevation = 3.dp
+                ) else ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
 
             ) {
                 Text("L", fontSize = 25.sp)
@@ -172,6 +193,7 @@ fun MainPizzaScreen(
             color = Color.Gray,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
+                .padding(start = 16.dp)
                 .fillMaxWidth()
                 .align(Alignment.Start)
         )
@@ -182,81 +204,26 @@ fun MainPizzaScreen(
             contentPadding = PaddingValues(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            item {
+            items(IngredientType.entries, key = { it.ordinal }) { ingredient ->
+
                 Box(
                     modifier = Modifier
-                        .background(color = Color.White, shape = CircleShape)
+                        .background(
+                            color = if (ingredient in pizzaScreenViewModel.getCurrentSelectedPizzaState().ingredients) Color(0xFFA8F0BE) else Color.White,
+                            shape = CircleShape
+                        )
                         .size(70.dp)
+                        .clickable{pizzaScreenViewModel.toggleIngredient(ingredient)}
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.basil_8),
+                        painter = painterResource(ingredient.getImageResource()),
                         contentDescription = null,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.padding(10.dp)
                     )
                 }
             }
-            item {
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White, shape = CircleShape)
-                        .size(70.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.onion_3),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.padding(10.dp)
 
-
-                    )
-                }
-            }
-            item {
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White, shape = CircleShape)
-                        .size(70.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.broccoli_7),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.padding(10.dp)
-
-                    )
-                }
-            }
-            item {
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White, shape = CircleShape)
-                        .size(70.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.mushroom_10),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.padding(10.dp)
-
-                    )
-                }
-            }
-            item {
-                Box(
-                    modifier = Modifier
-                        .background(color = Color.White, shape = CircleShape)
-                        .size(70.dp)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.sausage_2),
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.padding(10.dp)
-
-                    )
-                }
-            }
         }
         Spacer(modifier = Modifier.weight(1f))
         Button(

@@ -49,4 +49,8 @@ class MainPizzaScreenViewModel: ViewModel(){
         _pizzaScreenState.value = _pizzaScreenState.value.copy(selectedPizzaIndex = newIndex)
     }
 
+    fun getCurrentSelectedPizzaState(): PizzaUiState{
+        return _pizzaScreenState.value.pizzasUiState[_pizzaScreenState.value.selectedPizzaIndex]
+    }
+
 }
